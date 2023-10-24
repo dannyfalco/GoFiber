@@ -31,7 +31,7 @@ type ErrorResponse struct {
 	Value string `json:"value,omitempty"`
 }
 
-func ValidateStruct(payload Note) []*ErrorResponse {
+func ValidateStruct(payload CreateNoteSchema) []*ErrorResponse {
 	var errors []*ErrorResponse
 	err := validate.Struct(payload)
 	if err != nil {

@@ -1,10 +1,12 @@
 package main
 
 import (
+	"golang-fiber-sqlite/controllers"
 	"golang-fiber-sqlite/initializers"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 func init() {
@@ -13,10 +15,18 @@ func init() {
 
 func main() {
 	app := fiber.New()
+	micro := fiber.New()
 
-	app.Get("/api/healthchecker", func(c *fiber.Ctx) error {
+	app.Mount("/api", micro)
+	app.Use(logger.New())
+
+	micro.Route("/notes", func(router fiber.Router) {
+		router.Post("/", controllers.CreateNoteHandler)
+	})
+
+	micro.Get("/healthchecker", func(c *fiber.Ctx) error {
 		return c.Status(200).JSON(fiber.Map{
-			"status":  "status",
+			"status":  "success",
 			"message": "Welcome to Golang, Fiber, SQLite, and GORM",
 		})
 	})
