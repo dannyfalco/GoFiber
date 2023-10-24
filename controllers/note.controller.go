@@ -10,16 +10,16 @@ import (
 )
 
 func CreateNoteHandler(c *fiber.Ctx) error {
-	var payload *models.CreateNoteSchema
+	var payload models.CreateNoteSchema
 
 	if err := c.BodyParser(&payload); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "fail", "message": err.Error()})
 	}
 
-	//errors := models.ValidateStruct(payload)
-	//if errors != nil {
-	//	return c.Status(fiber.StatusBadRequest).JSON(errors)
-	//}
+	errors := models.ValidateStruct(payload)
+	if errors != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
 
 	now := time.Now()
 	newNote := models.Note{
