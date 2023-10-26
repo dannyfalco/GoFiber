@@ -21,7 +21,9 @@ func main() {
 	app.Use(logger.New())
 
 	micro.Route("/notes", func(router fiber.Router) {
-		router.Post("/", controllers.CreateNoteHandler)
+		router.Post("", controllers.CreateNoteHandler)
+		router.Get("", controllers.FindNotes)
+
 	})
 
 	micro.Get("/healthchecker", func(c *fiber.Ctx) error {
