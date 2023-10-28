@@ -26,6 +26,10 @@ func main() {
 
 	})
 
+	micro.Route("/notes/:noteId", func(router fiber.Router) {
+		router.Patch("", controllers.UpdateNote)
+	})
+
 	micro.Get("/healthchecker", func(c *fiber.Ctx) error {
 		return c.Status(200).JSON(fiber.Map{
 			"status":  "success",

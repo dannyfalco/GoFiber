@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 func CreateNoteHandler(c *fiber.Ctx) error {
@@ -17,10 +18,10 @@ func CreateNoteHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "fail", "message": err.Error()})
 	}
 
-	errors := models.ValidateStruct(payload)
+	/*errors := models.ValidateStruct(payload)
 	if errors != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(errors)
-	}
+	}*/
 
 	now := time.Now()
 	newNote := models.Note{
@@ -59,4 +60,44 @@ func FindNotes(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "results": len(notes), "notes": notes})
 
+}
+
+func UpdateNote(c *fiber.Ctx) error {
+	noteId := c.Params("noteId")
+
+	var payload *models.UpdateNoteSchema
+
+	if err := c.BodyParser(&payload); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "fail", "message": err.Error()})
+	}
+
+	var note models.Note
+	result := initializers.DB.First(&note, "id = ?", noteId)
+	if err := result.Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": "fail", "message": "No note with that id exists"})
+		}
+		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{"status": "fail", "message": err.Error()})
+	}
+
+	updates := make(map[string]interface{})
+	if payload.Title != "" {
+		updates["title"] = payload.Title
+	}
+	if payload.Category != "" {
+		updates["category"] = payload.Category
+	}
+	if payload.Content != "" {
+		updates["content"] = payload.Content
+	}
+
+	if payload.Published != nil {
+		updates["published"] = payload.Published
+	}
+
+	updates["updated_at"] = time.Now()
+
+	initializers.DB.Model(&note).Updates(updates)
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "data": fiber.Map{"note": note}})
 }
