@@ -27,6 +27,8 @@ func main() {
 	})
 
 	micro.Route("/notes/:noteId", func(router fiber.Router) {
+		router.Delete("", controllers.DeleteNote)
+		router.Get("", controllers.FindNoteById)
 		router.Patch("", controllers.UpdateNote)
 	})
 
